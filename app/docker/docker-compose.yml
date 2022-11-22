@@ -1,0 +1,60 @@
+version: '3.7'
+name: portfolio
+volumes:
+  go_packages:
+  mysql_data:
+services:
+  db:
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./my.cnf:/etc/my.cnf
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: dev
+      TZ: Asia/Tokyo
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: mysqladmin ping -u $MYSQL_USER -p$MYSQL_PASSWORD -h 127.0.0.1 || exit 1
+      interval: 1s
+      timeout: 30s
+      retries: 30
+  api:
+    build: ../api
+    working_dir: /app
+    volumes:
+      - go_packages:/go
+      - ../api:/app
+    env_file: api.env
+    environment:
+      CORS_ALLOW_ORIGINS: http://localhost:6061
+      APP_LISTEN_PORT: 6060
+      GO111MODULE: 'on'
+      GOPATH: /go
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: dev
+      TZ: Asia/Tokyo
+    command: air -c .air.toml
+    ports:
+      - 6060:6060
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    image: node:19-alpine
+    working_dir: /app
+    volumes:
+      - ../web:/app
+    environment:
+      NEXT_PUBLIC_CLIENT_SIDE_API_BASEPATH: http://localhost:6060
+      SERVER_SIDE_API_BASEPATH: http://api:6060
+      TZ: Asia/Tokyo
+    command: yarn dev -p 6061
+    ports:
+      - 6061:6061
+    depends_on:
+      - api

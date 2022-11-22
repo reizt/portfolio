@@ -1,0 +1,15 @@
+# standard
+.DS_Store
+*.pem
+*.env*
+node_modules
+tmp
+dist
+out
+build
+
+# web
+.next
+*.tsbuildinfo
+next-env.d.ts
+yarn-error.log*
