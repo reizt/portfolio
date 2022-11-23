@@ -1,39 +1,33 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/reizt/portfolio/src/drivers/db"
+	"github.com/reizt/portfolio/src/drivers/server"
 )
 
 func main() {
-	app := fiber.New()
-
-	// CORS
-	AllowOrigins := os.Getenv("CORS_ALLOW_ORIGINS")
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: AllowOrigins,
-		AllowMethods: "GET,POST,PATCH,PUT,DELETE",
-	}))
-
-	// Logger
-	app.Use(logger.New(logger.Config{
-		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
-	}))
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello world from portfolio API!")
-	})
-
-	port := os.Getenv("APP_LISTEN_PORT")
-	if port == "" {
-		log.Fatal("Port is not specified as an environment variable $APP_LISTEN_PORT.")
+	if len(os.Args) < 2 {
+		log.Fatal("2nd argument is required")
 		return
 	}
-	fmt.Printf("Server started at http://localhost:%s.\n", port)
-	log.Fatal(app.Listen(":" + port))
+
+	switch os.Args[1] {
+	case "start":
+		if len(os.Args) < 3 {
+			log.Fatal("3rd argument is required")
+			return
+		}
+		switch os.Args[2] {
+		case "dev":
+			log.SetFlags(log.Lshortfile)
+			server.LaunchDevServer()
+			return
+		}
+	case "migrate":
+		db.MigrateSync()
+		return
+	}
 }

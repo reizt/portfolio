@@ -1,32 +1,15 @@
 version: '3.7'
 name: portfolio
 volumes:
+  sqlite_data:
   go_packages:
-  mysql_data:
 services:
-  db:
-    image: mysql:8.0
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./my.cnf:/etc/my.cnf
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_DATABASE: dev
-      TZ: Asia/Tokyo
-    ports:
-      - 3306:3306
-    healthcheck:
-      test: mysqladmin ping -u $MYSQL_USER -p$MYSQL_PASSWORD -h 127.0.0.1 || exit 1
-      interval: 1s
-      timeout: 30s
-      retries: 30
   api:
     build: ../api
     working_dir: /app
     volumes:
       - go_packages:/go
+      - sqlite_data:/var/lib/sqlite
       - ../api:/app
     env_file: api.env
     environment:
@@ -34,16 +17,17 @@ services:
       APP_LISTEN_PORT: 6060
       GO111MODULE: 'on'
       GOPATH: /go
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_DATABASE: dev
+      SQLITE_PATH: /var/lib/sqlite/auth.db
       TZ: Asia/Tokyo
     command: air -c .air.toml
     ports:
       - 6060:6060
-    depends_on:
-      db:
-        condition: service_healthy
+    healthcheck:
+      test: curl --fail -LI -XOPTIONS http://localhost:6060 || exit 1
+      start_period: 3s
+      interval: 10s
+      timeout: 10s
+      retries: 5
   web:
     image: node:19-alpine
     working_dir: /app
@@ -57,4 +41,5 @@ services:
     ports:
       - 6061:6061
     depends_on:
-      - api
+      api:
+        condition: service_healthy
