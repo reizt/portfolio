@@ -4,14 +4,14 @@ volumes:
   sqlite_data:
   go_packages:
 services:
-  api:
-    build: ../api
+  auth:
+    build: ../auth
     working_dir: /app
     volumes:
       - go_packages:/go
       - sqlite_data:/var/lib/sqlite
-      - ../api:/app
-    env_file: api.env
+      - ../auth:/app
+    env_file: auth.env
     environment:
       CORS_ALLOW_ORIGINS: http://localhost:6061
       APP_LISTEN_PORT: 6060
@@ -35,11 +35,11 @@ services:
       - ../web:/app
     environment:
       NEXT_PUBLIC_CLIENT_SIDE_API_BASEPATH: http://localhost:6060
-      SERVER_SIDE_API_BASEPATH: http://api:6060
+      SERVER_SIDE_API_BASEPATH: http://auth:6060
       TZ: Asia/Tokyo
     command: yarn dev -p 6061
     ports:
       - 6061:6061
     depends_on:
-      api:
+      auth:
         condition: service_healthy
