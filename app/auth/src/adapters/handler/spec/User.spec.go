@@ -6,4 +6,6 @@ import (
 
 type GetUsersRequest struct{}
 
-type GetUsers200Response []core.User
+type GetUsers200Response struct {
+	Data []core.User `json:"data"`
+}

@@ -20,6 +20,8 @@ func (h *handler) GetUsers(c Ctx) error {
 		}
 		return (*c.Status(500)).SendJson(map[string]string{"sentence": "An error occured!"})
 	}
-	data := spec.GetUsers200Response(*users)
+	data := spec.GetUsers200Response{
+		Data: *users,
+	}
 	return c.SendJson(data)
 }

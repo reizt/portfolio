@@ -18,10 +18,10 @@ func (h *handler) SayHello(c Ctx) error {
 	body, err := body[spec.SayHelloRequest](c)
 	if err != nil {
 		if _, ok := err.(*json.SyntaxError); ok {
-			resBody := spec.SayHello400Response{Error: spec.SayHello400ResponseError{Sentence: sayHello400Sentence}}
+			resBody := spec.SayHello400Response{Error: spec.SayHello400ResponseError{Message: sayHello400Sentence}}
 			return (*c.Status(400)).SendJson(resBody)
 		}
-		resBody := spec.SayHello500Response{Error: spec.SayHello500ResponseError{Sentence: sayHello500Sentence}}
+		resBody := spec.SayHello500Response{Error: spec.SayHello500ResponseError{Message: sayHello500Sentence}}
 		return (*c.Status(500)).SendJson(resBody)
 	}
 	input := app.SayHelloInput{
@@ -34,13 +34,13 @@ func (h *handler) SayHello(c Ctx) error {
 	// Make output
 	if err != nil {
 		if err == core.ErrInvalidInput {
-			resBody := spec.SayHello400Response{Error: spec.SayHello400ResponseError{Sentence: sayHello400Sentence}}
+			resBody := spec.SayHello400Response{Error: spec.SayHello400ResponseError{Message: sayHello400Sentence}}
 			return (*c.Status(400)).SendJson(resBody)
 		}
-		resBody := spec.SayHello500Response{Error: spec.SayHello500ResponseError{Sentence: sayHello500Sentence}}
+		resBody := spec.SayHello500Response{Error: spec.SayHello500ResponseError{Message: sayHello500Sentence}}
 		return (*c.Status(500)).SendJson(resBody)
 	}
 
-	resBody := spec.SayHello200Response{Data: spec.SayHello200ResponseData{Sentence: sentence}}
+	resBody := spec.SayHello200Response{Data: spec.SayHello200ResponseData{Sentence: *sentence}}
 	return (*c.Status(200)).SendJson(resBody)
 }

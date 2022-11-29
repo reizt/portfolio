@@ -15,12 +15,12 @@ type SayHello400Response struct {
 	Error SayHello400ResponseError `json:"error"`
 }
 type SayHello400ResponseError struct {
-	Sentence string `json:"sentence"`
+	Message string `json:"message"`
 }
 
 type SayHello500Response struct {
 	Error SayHello500ResponseError `json:"error"`
 }
 type SayHello500ResponseError struct {
-	Sentence string `json:"sentence"`
+	Message string `json:"message"`
 }

@@ -3,15 +3,17 @@ package server
 import (
 	"fmt"
 	"log"
-	"os"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func LaunchDevServer() {
+func LaunchDevServer(port int) {
 	// Init fiber instance
 	server := fiber.New()
 
+	// Recover
+	server.Use(recoverMw())
 	// CORS
 	server.Use(corsMw())
 	// Logger
@@ -21,15 +23,6 @@ func LaunchDevServer() {
 	setRouter(server)
 
 	// Listen
-	port := getDevPort()
-	fmt.Printf("Server started at http://localhost:%s.\n", port)
-	log.Fatal(server.Listen(":" + port))
-}
-
-func getDevPort() string {
-	port := os.Getenv("APP_LISTEN_PORT")
-	if port == "" {
-		panic("Port is not specified as an environment variable $APP_LISTEN_PORT.")
-	}
-	return port
+	fmt.Printf("Server started at http://localhost:%d.\n", port)
+	log.Fatal(server.Listen(":" + strconv.Itoa(port)))
 }
